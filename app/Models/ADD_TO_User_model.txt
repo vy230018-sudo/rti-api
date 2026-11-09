@@ -1,0 +1,6 @@
+// app/Models/User.php me class ke andar ye relation add karein:
+
+    public function deviceTokens(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }

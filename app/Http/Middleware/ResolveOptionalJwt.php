@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\User;
+use App\Services\JwtService;
+use Closure;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * Resolves a bearer token when one is supplied, without making a public
+ * endpoint unavailable to guests. A supplied invalid token is still rejected.
+ */
+class ResolveOptionalJwt
+{
+    public function __construct(protected JwtService $jwtService)
+    {
+    }
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        $token = $request->bearerToken();
+
+        if (! $token) {
+            return $next($request);
+        }
+
+        try {
+            $payload = $this->jwtService->decode($token);
+            $user = User::query()->find($payload['sub'] ?? null);
+
+            // Delete (is_deleted = 0) user ka purana token bhi reject karo. Admin ko chhod ke.
+            if (! $user || (! $user->is_admin && (string) $user->is_deleted === '0')) {
+                throw new AuthenticationException('Authenticated user was not found.');
+            }
+
+            Auth::setUser($user);
+            $request->setUserResolver(fn () => $user);
+            $request->attributes->set('jwt_token', $token);
+            $request->attributes->set('jwt_payload', $payload);
+        } catch (AuthenticationException $exception) {
+            return new JsonResponse(['message' => $exception->getMessage()], 401);
+        }
+
+        return $next($request);
+    }
+}

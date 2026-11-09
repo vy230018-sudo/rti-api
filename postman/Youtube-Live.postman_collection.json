@@ -1,0 +1,11 @@
+{
+  "info": {"name": "RTI YouTube Live", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "variable": [{"key": "baseUrl", "value": "http://localhost/rti-api"}, {"key": "broadcastId", "value": ""}],
+  "item": [
+    {"name": "OAuth authorization URL", "request": {"method": "GET", "url": "{{baseUrl}}/api/youtube/auth"}},
+    {"name": "Create live", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"title\": \"RTI Live\",\n  \"description\": \"News Live\",\n  \"privacyStatus\": \"public\",\n  \"scheduledStartTime\": \"2026-07-28T12:00:00Z\"\n}"}, "url": "{{baseUrl}}/api/youtube/live/create"}},
+    {"name": "Start live", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"broadcast_id\": \"{{broadcastId}}\"}"}, "url": "{{baseUrl}}/api/youtube/live/start"}},
+    {"name": "End live", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"broadcast_id\": \"{{broadcastId}}\"}"}, "url": "{{baseUrl}}/api/youtube/live/end"}},
+    {"name": "Current live", "request": {"method": "GET", "url": "{{baseUrl}}/api/youtube/live/current"}}
+  ]
+}
